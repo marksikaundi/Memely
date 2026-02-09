@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Allow Memely to access your photos so you can import and edit memes.",
         "NSPhotoLibraryAddUsageDescription": "Allow Memely to save memes to your photo library."
-      }
+      },
+      "bundleIdentifier": "com.luplegstudios.memely"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,10 +26,17 @@
       "permissions": [
         "READ_MEDIA_IMAGES",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
       ],
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.luplegstudios.memely"
     },
     "web": {
       "output": "static",

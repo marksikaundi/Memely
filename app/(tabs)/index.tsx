@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Modal,
   Platform,
   Pressable,
   SafeAreaView,
@@ -161,6 +162,8 @@ export default function MemeEditorScreen() {
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [flipX, setFlipX] = useState(false);
   const [flipY, setFlipY] = useState(false);
+  const [recentStickers, setRecentStickers] = useState<string[]>([]);
+  const [stickerPickerOpen, setStickerPickerOpen] = useState(false);
 
   const canvasRef = useRef<View>(null);
 
@@ -194,8 +197,18 @@ export default function MemeEditorScreen() {
 
   const selectedLayer = useMemo(() => layers.find((layer) => layer.id === selectedLayerId) ?? null, [layers, selectedLayerId]);
 
-  const updateLayer = useCallback((id: string, updater: Partial<MemeLayer>) => {
-    setLayers((current) => current.map((layer) => (layer.id === id ? { ...layer, ...updater } : layer)));
+  type LayerUpdater = Partial<TextLayer> | Partial<EffectLayer>;
+
+  const updateLayer = useCallback((id: string, updater: LayerUpdater) => {
+    setLayers((current): MemeLayer[] =>
+      current.map((layer) => {
+        if (layer.id !== id) return layer;
+        if (layer.type === 'effect') {
+          return { ...layer, ...(updater as Partial<EffectLayer>) };
+        }
+        return { ...layer, ...(updater as Partial<TextLayer>) };
+      })
+    );
   }, []);
 
   const updateLayerTransform = useCallback((id: string, transform: LayerTransform) => {
@@ -215,6 +228,10 @@ export default function MemeEditorScreen() {
     const newLayer = buildTextLayer(emoji, 0, true);
     setLayers((current) => [...current, newLayer]);
     setSelectedLayerId(newLayer.id);
+    setRecentStickers((current) => {
+      const next = [emoji, ...current.filter((item) => item !== emoji)];
+      return next.slice(0, 8);
+    });
   }, []);
 
   const addEffectLayer = useCallback((effect: EffectKind) => {
@@ -446,7 +463,7 @@ export default function MemeEditorScreen() {
           <ActionButton label="Templates" onPress={() => router.navigate('/(tabs)/explore')} theme={theme} />
           <ActionButton label="Upload" onPress={handlePickImage} theme={theme} />
           <ActionButton label="Add Text" onPress={() => addTextLayer()} theme={theme} />
-          <ActionButton label="Stickers" onPress={() => addStickerLayer(emojiStickers[0])} theme={theme} />
+          <ActionButton label="Stickers" onPress={() => setStickerPickerOpen(true)} theme={theme} />
           <ActionButton label="Effects" onPress={() => addEffectLayer('confetti')} theme={theme} />
           <ActionButton label="Reset" onPress={resetLayers} theme={theme} />
         </View>
@@ -462,7 +479,7 @@ export default function MemeEditorScreen() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Quick Stickers</Text>
           <View style={styles.actionRow}>
-            {emojiStickers.map((emoji) => (
+            {(recentStickers.length > 0 ? recentStickers : emojiStickers.slice(0, 6)).map((emoji) => (
               <Pressable
                 key={emoji}
                 style={[styles.emojiButton, { backgroundColor: theme.panelAlt }]}
@@ -470,6 +487,11 @@ export default function MemeEditorScreen() {
                 <Text style={styles.emojiText}>{emoji}</Text>
               </Pressable>
             ))}
+            <Pressable
+              style={[styles.allStickerButton, { borderColor: theme.border, backgroundColor: theme.panel }]}
+              onPress={() => setStickerPickerOpen(true)}>
+              <Text style={[styles.allStickerText, { color: theme.text }]}>All</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -624,6 +646,39 @@ export default function MemeEditorScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={stickerPickerOpen}
+        onRequestClose={() => setStickerPickerOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setStickerPickerOpen(false)} />
+          <View style={[styles.stickerModal, { backgroundColor: theme.panel, borderColor: theme.border }]}>
+            <View style={styles.stickerHeader}>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>All Stickers</Text>
+              <Pressable
+                onPress={() => setStickerPickerOpen(false)}
+                style={[styles.closeChip, { backgroundColor: theme.panelAlt }]}>
+                <Text style={[styles.closeChipText, { color: theme.text }]}>Close</Text>
+              </Pressable>
+            </View>
+            <View style={styles.stickerGrid}>
+              {emojiStickers.map((emoji) => (
+                <Pressable
+                  key={emoji}
+                  style={[styles.emojiButton, { backgroundColor: theme.panelAlt }]}
+                  onPress={() => {
+                    addStickerLayer(emoji);
+                    setStickerPickerOpen(false);
+                  }}>
+                  <Text style={styles.emojiText}>{emoji}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -829,6 +884,19 @@ const styles = StyleSheet.create({
   emojiText: {
     fontSize: 22,
   },
+  allStickerButton: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    justifyContent: 'center',
+  },
+  allStickerText: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   colorSwatch: {
     width: 28,
     height: 28,
@@ -843,5 +911,38 @@ const styles = StyleSheet.create({
     width: '16.66%',
     height: '16.66%',
     backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  stickerModal: {
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 16,
+    gap: 12,
+  },
+  stickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  closeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  closeChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  stickerGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
 });
