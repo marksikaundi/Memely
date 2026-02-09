@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { memeCategories, memeTemplates, MemeCategory, MemeTemplate } from '@/data/meme-templates';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -17,6 +18,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function TemplatesScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState<MemeCategory>('Classic');
 
   const theme = useMemo(
@@ -78,7 +80,7 @@ export default function TemplatesScreen() {
         contentContainerStyle={styles.grid}
         ListHeaderComponent={
           <View style={styles.headerBlock}>
-            <View style={styles.heroRow}>
+            <View style={[styles.heroRow, { paddingTop: Math.max(16, insets.top + 8) }]}>
               <View>
                 <Text style={[styles.title, { color: theme.text }]}>Template Vault</Text>
                 <Text style={[styles.subtitle, { color: theme.subtext }]}>Pick a vibe, then wreck it.</Text>
@@ -162,7 +164,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 12,
     paddingBottom: 12,
   },
   title: {

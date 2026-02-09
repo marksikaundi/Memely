@@ -17,6 +17,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import { captureRef } from 'react-native-view-shot';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { getRandomTemplate, getTemplateById, memeTemplates } from '@/data/meme-templates';
@@ -147,6 +148,7 @@ export default function MemeEditorScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const { templateId, random, seed } = useLocalSearchParams<{ templateId?: string; random?: string; seed?: string }>();
+  const insets = useSafeAreaInsets();
 
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [background, setBackground] = useState<Background>(() => ({
@@ -367,7 +369,7 @@ export default function MemeEditorScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}> 
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(16, insets.top + 8) }]}>
         <View>
           <Text style={[styles.title, { color: theme.text }]}>Memely</Text>
           <Text style={[styles.subtitle, { color: theme.subtext }]}>Offline meme forge</Text>
@@ -741,7 +743,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 12,
     paddingBottom: 8,
   },
   title: {
