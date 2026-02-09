@@ -5,36 +5,36 @@ const IS_PREVIEW = process.env.APP_VARIANT === "preview";
 
 const getUniqueIdentifier = () => {
   if (IS_DEV) {
-    return "com.luplegstudios.chilimba.dev";
+    return "com.luplegstudios.memely.dev";
   }
 
   if (IS_PREVIEW) {
-    return "com.luplegstudios.chilimba.preview";
+    return "com.luplegstudios.memely.preview";
   }
 
-  return "com.luplegstudios.chilimba";
+  return "com.luplegstudios.memely";
 };
 
 const getAppName = () => {
   if (IS_DEV) {
-    return "Chilimba (Dev)";
+    return "Memely (Dev)";
   }
 
   if (IS_PREVIEW) {
-    return "Chilimba (Preview)";
+    return "Memely (Preview)";
   }
 
-  return "Chilimba";
+  return "Memely";
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: getAppName(),
-  slug: "chilimba",
+  slug: "memely",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "chilimba",
+  scheme: "memely",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   ios: {
@@ -77,7 +77,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     router: {},
     eas: {
-      projectId: "f004de77-edde-44ca-9855-d93fa54fc573",
+      projectId: "5be7988e-4f93-4361-852f-4a18dab4ae7b",
     },
   },
   owner: "luplegstudios",
