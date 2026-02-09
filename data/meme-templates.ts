@@ -1,5 +1,7 @@
 import { ImageSourcePropType } from 'react-native';
 
+import { MemeTag } from './random-text';
+
 export type MemeCategory = 'Classic' | 'Reaction' | 'Sarcastic' | 'Random';
 
 export type MemeTemplate = {
@@ -7,41 +9,63 @@ export type MemeTemplate = {
   name: string;
   category: MemeCategory;
   source: ImageSourcePropType;
+  tags: MemeTag[];
 };
 
+const categoryTags: Record<MemeCategory, MemeTag[]> = {
+  Classic: ['relief', 'overthinking', 'win'],
+  Reaction: ['confused', 'awkward', 'suspicious'],
+  Sarcastic: ['sassy', 'fail', 'overthinking'],
+  Random: ['chaos', 'tired', 'win', 'fail'],
+};
+
+const makeTemplate = (
+  id: string,
+  name: string,
+  category: MemeCategory,
+  source: ImageSourcePropType,
+  tags: MemeTag[] = categoryTags[category]
+): MemeTemplate => ({
+  id,
+  name,
+  category,
+  source,
+  tags,
+});
+
 export const memeTemplates: MemeTemplate[] = [
-  { id: 'classic-01', name: 'Retro Burst', category: 'Classic', source: require('@/assets/memes/meme_01.png') },
-  { id: 'classic-02', name: 'Hot Sauce', category: 'Classic', source: require('@/assets/memes/meme_02.png') },
-  { id: 'classic-03', name: 'Peach Glow', category: 'Classic', source: require('@/assets/memes/meme_03.png') },
-  { id: 'classic-04', name: 'Gold Rush', category: 'Classic', source: require('@/assets/memes/meme_04.png') },
-  { id: 'classic-05', name: 'Fresh Mint', category: 'Classic', source: require('@/assets/memes/meme_05.png') },
-  { id: 'classic-06', name: 'Teal Tide', category: 'Classic', source: require('@/assets/memes/meme_06.png') },
-  { id: 'classic-07', name: 'Deep Harbor', category: 'Classic', source: require('@/assets/memes/meme_07.png') },
-  { id: 'classic-08', name: 'Forest Haze', category: 'Classic', source: require('@/assets/memes/meme_08.png') },
-  { id: 'reaction-01', name: 'Midnight Punch', category: 'Reaction', source: require('@/assets/memes/meme_09.png') },
-  { id: 'reaction-02', name: 'Violet Echo', category: 'Reaction', source: require('@/assets/memes/meme_10.png') },
-  { id: 'reaction-03', name: 'Candy Drop', category: 'Reaction', source: require('@/assets/memes/meme_11.png') },
-  { id: 'reaction-04', name: 'Lemon Drop', category: 'Reaction', source: require('@/assets/memes/meme_12.png') },
-  { id: 'reaction-05', name: 'Mint Pop', category: 'Reaction', source: require('@/assets/memes/meme_13.png') },
-  { id: 'reaction-06', name: 'Sky Shock', category: 'Reaction', source: require('@/assets/memes/meme_14.png') },
-  { id: 'reaction-07', name: 'Berry Ink', category: 'Reaction', source: require('@/assets/memes/meme_15.png') },
-  { id: 'reaction-08', name: 'Citrus Zip', category: 'Reaction', source: require('@/assets/memes/meme_16.png') },
-  { id: 'sarcastic-01', name: 'Terracotta', category: 'Sarcastic', source: require('@/assets/memes/meme_17.png') },
-  { id: 'sarcastic-02', name: 'Night Slate', category: 'Sarcastic', source: require('@/assets/memes/meme_18.png') },
-  { id: 'sarcastic-03', name: 'Herbal Mist', category: 'Sarcastic', source: require('@/assets/memes/meme_19.png') },
-  { id: 'sarcastic-04', name: 'Sand Drift', category: 'Sarcastic', source: require('@/assets/memes/meme_20.png') },
-  { id: 'sarcastic-05', name: 'Bubblegum', category: 'Sarcastic', source: require('@/assets/memes/meme_21.png') },
-  { id: 'sarcastic-06', name: 'Ice Pop', category: 'Sarcastic', source: require('@/assets/memes/meme_22.png') },
-  { id: 'sarcastic-07', name: 'Lavender Blur', category: 'Sarcastic', source: require('@/assets/memes/meme_23.png') },
-  { id: 'sarcastic-08', name: 'Dew Drop', category: 'Sarcastic', source: require('@/assets/memes/meme_24.png') },
-  { id: 'random-01', name: 'Sunny Side', category: 'Random', source: require('@/assets/memes/meme_25.png') },
-  { id: 'random-02', name: 'Neon Blue', category: 'Random', source: require('@/assets/memes/meme_26.png') },
-  { id: 'random-03', name: 'Aqua Flash', category: 'Random', source: require('@/assets/memes/meme_27.png') },
-  { id: 'random-04', name: 'Electric Grape', category: 'Random', source: require('@/assets/memes/meme_28.png') },
-  { id: 'random-05', name: 'Pink Buzz', category: 'Random', source: require('@/assets/memes/meme_29.png') },
-  { id: 'random-06', name: 'Fresh Tide', category: 'Random', source: require('@/assets/memes/meme_30.png') },
-  { id: 'random-07', name: 'Sea Glass', category: 'Random', source: require('@/assets/memes/meme_31.png') },
-  { id: 'random-08', name: 'Soft Current', category: 'Random', source: require('@/assets/memes/meme_32.png') },
+  makeTemplate('classic-01', 'Retro Burst', 'Classic', require('@/assets/memes/meme_01.png')),
+  makeTemplate('classic-02', 'Hot Sauce', 'Classic', require('@/assets/memes/meme_02.png')),
+  makeTemplate('classic-03', 'Peach Glow', 'Classic', require('@/assets/memes/meme_03.png')),
+  makeTemplate('classic-04', 'Gold Rush', 'Classic', require('@/assets/memes/meme_04.png')),
+  makeTemplate('classic-05', 'Fresh Mint', 'Classic', require('@/assets/memes/meme_05.png')),
+  makeTemplate('classic-06', 'Teal Tide', 'Classic', require('@/assets/memes/meme_06.png')),
+  makeTemplate('classic-07', 'Deep Harbor', 'Classic', require('@/assets/memes/meme_07.png')),
+  makeTemplate('classic-08', 'Forest Haze', 'Classic', require('@/assets/memes/meme_08.png')),
+  makeTemplate('reaction-01', 'Midnight Punch', 'Reaction', require('@/assets/memes/meme_09.png')),
+  makeTemplate('reaction-02', 'Violet Echo', 'Reaction', require('@/assets/memes/meme_10.png')),
+  makeTemplate('reaction-03', 'Candy Drop', 'Reaction', require('@/assets/memes/meme_11.png')),
+  makeTemplate('reaction-04', 'Lemon Drop', 'Reaction', require('@/assets/memes/meme_12.png')),
+  makeTemplate('reaction-05', 'Mint Pop', 'Reaction', require('@/assets/memes/meme_13.png')),
+  makeTemplate('reaction-06', 'Sky Shock', 'Reaction', require('@/assets/memes/meme_14.png')),
+  makeTemplate('reaction-07', 'Berry Ink', 'Reaction', require('@/assets/memes/meme_15.png')),
+  makeTemplate('reaction-08', 'Citrus Zip', 'Reaction', require('@/assets/memes/meme_16.png')),
+  makeTemplate('sarcastic-01', 'Terracotta', 'Sarcastic', require('@/assets/memes/meme_17.png')),
+  makeTemplate('sarcastic-02', 'Night Slate', 'Sarcastic', require('@/assets/memes/meme_18.png')),
+  makeTemplate('sarcastic-03', 'Herbal Mist', 'Sarcastic', require('@/assets/memes/meme_19.png')),
+  makeTemplate('sarcastic-04', 'Sand Drift', 'Sarcastic', require('@/assets/memes/meme_20.png')),
+  makeTemplate('sarcastic-05', 'Bubblegum', 'Sarcastic', require('@/assets/memes/meme_21.png')),
+  makeTemplate('sarcastic-06', 'Ice Pop', 'Sarcastic', require('@/assets/memes/meme_22.png')),
+  makeTemplate('sarcastic-07', 'Lavender Blur', 'Sarcastic', require('@/assets/memes/meme_23.png')),
+  makeTemplate('sarcastic-08', 'Dew Drop', 'Sarcastic', require('@/assets/memes/meme_24.png')),
+  makeTemplate('random-01', 'Sunny Side', 'Random', require('@/assets/memes/meme_25.png')),
+  makeTemplate('random-02', 'Neon Blue', 'Random', require('@/assets/memes/meme_26.png')),
+  makeTemplate('random-03', 'Aqua Flash', 'Random', require('@/assets/memes/meme_27.png')),
+  makeTemplate('random-04', 'Electric Grape', 'Random', require('@/assets/memes/meme_28.png')),
+  makeTemplate('random-05', 'Pink Buzz', 'Random', require('@/assets/memes/meme_29.png')),
+  makeTemplate('random-06', 'Fresh Tide', 'Random', require('@/assets/memes/meme_30.png')),
+  makeTemplate('random-07', 'Sea Glass', 'Random', require('@/assets/memes/meme_31.png')),
+  makeTemplate('random-08', 'Soft Current', 'Random', require('@/assets/memes/meme_32.png')),
 ];
 
 export const memeCategories: MemeCategory[] = ['Classic', 'Reaction', 'Sarcastic', 'Random'];

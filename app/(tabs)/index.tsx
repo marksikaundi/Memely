@@ -21,7 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { getRandomTemplate, getTemplateById, memeTemplates } from '@/data/meme-templates';
-import { getRandomTextPair } from '@/data/random-text';
+import { getRandomTextPairForTags } from '@/data/random-text';
 import { LayerTransform, TransformableLayer } from '@/components/meme/transformable-layer';
 
 const textPalette = ['#FFFFFF', '#FFD23F', '#00F5D4', '#FF5D8F', '#0B0F1F', '#F9F5E3'];
@@ -237,7 +237,7 @@ export default function MemeEditorScreen() {
 
   const randomizeMeme = useCallback(() => {
     const template = getRandomTemplate();
-    const textPair = getRandomTextPair();
+    const textPair = getRandomTextPairForTags(template.tags);
     setBackground({ kind: 'template', templateId: template.id, source: template.source });
     setFlipX(false);
     setFlipY(false);
