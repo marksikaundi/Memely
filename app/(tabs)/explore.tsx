@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   FlatList,
+  Modal,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -13,13 +14,17 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { memeCategories, memeTemplates, MemeCategory, MemeTemplate } from '@/data/meme-templates';
+import { getRandomTextPairForTags, RandomTextPair } from '@/data/random-text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TemplatesScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const [selectedCategory, setSelectedCategory] = useState<MemeCategory>('Classic');
+  type CategoryFilter = 'All' | MemeCategory;
+  const categories: CategoryFilter[] = ['All', ...memeCategories];
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('All');
+  const [preview, setPreview] = useState<{ template: MemeTemplate; caption: RandomTextPair } | null>(null);
 
   const theme = useMemo(
     () =>
@@ -49,24 +54,29 @@ export default function TemplatesScreen() {
     [colorScheme]
   );
 
-  const filteredTemplates = useMemo(
-    () => memeTemplates.filter((template) => template.category === selectedCategory),
-    [selectedCategory]
-  );
+  const filteredTemplates = useMemo(() => {
+    if (selectedCategory === 'All') return memeTemplates;
+    return memeTemplates.filter((template) => template.category === selectedCategory);
+  }, [selectedCategory]);
 
   const totalCount = memeTemplates.length;
 
   const handleTemplatePress = (template: MemeTemplate) => {
-    router.push({
-      pathname: '/',
-      params: { templateId: template.id, seed: String(Date.now()) },
-    });
+    setPreview({ template, caption: getRandomTextPairForTags(template.tags) });
   };
 
   const handleRandomPress = () => {
     router.push({
       pathname: '/',
       params: { random: '1', seed: String(Date.now()) },
+    });
+  };
+
+  const handleUseTemplate = (template: MemeTemplate) => {
+    setPreview(null);
+    router.push({
+      pathname: '/',
+      params: { templateId: template.id, seed: String(Date.now()) },
     });
   };
 
@@ -109,7 +119,7 @@ export default function TemplatesScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.categoryRow}>
-              {memeCategories.map((category) => (
+              {categories.map((category) => (
                 <Pressable
                   key={category}
                   onPress={() => setSelectedCategory(category)}
@@ -148,6 +158,66 @@ export default function TemplatesScreen() {
           </Pressable>
         )}
       />
+
+      <Modal
+        visible={!!preview}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreview(null)}>
+        <View style={[styles.modalBackdrop, { backgroundColor: 'rgba(0,0,0,0.55)' }]}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setPreview(null)} />
+          {preview ? (
+            <View style={[styles.modalCard, { backgroundColor: theme.panel, borderColor: theme.border }]}>
+              <Image source={preview.template.source} style={styles.modalImage} contentFit="cover" />
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <View>
+                    <Text style={[styles.modalTitle, { color: theme.text }]}>{preview.template.name}</Text>
+                    <Text style={[styles.modalMeta, { color: theme.subtext }]}>{preview.template.category}</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setPreview(null)}
+                    style={[styles.closeChip, { backgroundColor: theme.panelAlt }]}>
+                    <Text style={[styles.closeChipText, { color: theme.text }]}>Close</Text>
+                  </Pressable>
+                </View>
+
+                <View style={styles.tagRow}>
+                  {preview.template.tags.map((tag) => (
+                    <View
+                      key={tag}
+                      style={[styles.tagChip, { borderColor: theme.border, backgroundColor: theme.panelAlt }]}>
+                      <Text style={[styles.tagText, { color: theme.text }]}>{tag.toUpperCase()}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={[styles.captionBox, { backgroundColor: theme.panelAlt, borderColor: theme.border }]}>
+                  <Text style={[styles.captionLine, { color: theme.text }]}>{preview.caption.top}</Text>
+                  <Text style={[styles.captionLine, { color: theme.text }]}>{preview.caption.bottom}</Text>
+                </View>
+
+                <View style={styles.modalActions}>
+                  <Pressable
+                    onPress={() =>
+                      setPreview((current) =>
+                        current ? { ...current, caption: getRandomTextPairForTags(current.template.tags) } : current
+                      )
+                    }
+                    style={[styles.secondaryButton, { backgroundColor: theme.panelAlt }]}>
+                    <Text style={[styles.secondaryButtonText, { color: theme.text }]}>Shuffle Caption</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleUseTemplate(preview.template)}
+                    style={[styles.primaryButton, { backgroundColor: theme.accent }]}>
+                    <Text style={styles.primaryButtonText}>Use Template</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          ) : null}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -274,5 +344,107 @@ const styles = StyleSheet.create({
     fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    borderRadius: 20,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  modalImage: {
+    width: '100%',
+    aspectRatio: 1.2,
+  },
+  modalContent: {
+    padding: 16,
+    gap: 12,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  modalMeta: {
+    marginTop: 4,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1.4,
+  },
+  closeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  closeChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tagChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  tagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  captionBox: {
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 4,
+  },
+  captionLine: {
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  secondaryButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  primaryButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: '#0B0F1F',
   },
 });

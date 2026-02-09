@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ImageSourcePropType,
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -70,7 +71,7 @@ type MemeLayer = TextLayer | EffectLayer;
 type TemplateBackground = {
   kind: 'template';
   templateId: string;
-  source: number;
+  source: ImageSourcePropType;
 };
 
 type CustomBackground = {
