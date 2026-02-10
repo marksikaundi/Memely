@@ -20,6 +20,7 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   sparkles: 'auto-awesome',
   'photo.stack.fill': 'photo-library',
+  'pencil.and.scribble': 'draw',
 } as IconMapping;
 
 /**

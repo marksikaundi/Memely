@@ -38,6 +38,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="photo.stack.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="craft"
+        options={{
+          title: 'Craft',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="pencil.and.scribble" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
