@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
-  Modal,
   Platform,
   Pressable,
   SafeAreaView,
@@ -24,11 +23,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { getRandomTemplate, getTemplateById, memeTemplates } from '@/data/meme-templates';
 import { getRandomTextPairForTags } from '@/data/random-text';
+import { defaultQuickEmojis } from '@/data/emoji-catalog';
 import { LayerTransform, TransformableLayer } from '@/components/meme/transformable-layer';
+import { EmojiPicker } from '@/components/meme/emoji-picker';
 
 const textPalette = ['#FFFFFF', '#FFD23F', '#00F5D4', '#FF5D8F', '#0B0F1F', '#F9F5E3'];
 const strokePalette = ['#000000', '#202124', '#FFFFFF'];
-const emojiStickers = ['😂', '🔥', '🤡', '✨', '💀', '😈'];
 
 type MemeFont = 'impact' | 'bold' | 'comic';
 
@@ -479,7 +479,7 @@ export default function MemeEditorScreen() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Quick Stickers</Text>
           <View style={styles.actionRow}>
-            {(recentStickers.length > 0 ? recentStickers : emojiStickers.slice(0, 6)).map((emoji) => (
+            {(recentStickers.length > 0 ? recentStickers : defaultQuickEmojis.slice(0, 6)).map((emoji) => (
               <Pressable
                 key={emoji}
                 style={[styles.emojiButton, { backgroundColor: theme.panelAlt }]}
@@ -647,38 +647,16 @@ export default function MemeEditorScreen() {
         </View>
       </ScrollView>
 
-      <Modal
-        transparent
-        animationType="fade"
+      <EmojiPicker
         visible={stickerPickerOpen}
-        onRequestClose={() => setStickerPickerOpen(false)}>
-        <View style={styles.modalBackdrop}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setStickerPickerOpen(false)} />
-          <View style={[styles.stickerModal, { backgroundColor: theme.panel, borderColor: theme.border }]}>
-            <View style={styles.stickerHeader}>
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>All Stickers</Text>
-              <Pressable
-                onPress={() => setStickerPickerOpen(false)}
-                style={[styles.closeChip, { backgroundColor: theme.panelAlt }]}>
-                <Text style={[styles.closeChipText, { color: theme.text }]}>Close</Text>
-              </Pressable>
-            </View>
-            <View style={styles.stickerGrid}>
-              {emojiStickers.map((emoji) => (
-                <Pressable
-                  key={emoji}
-                  style={[styles.emojiButton, { backgroundColor: theme.panelAlt }]}
-                  onPress={() => {
-                    addStickerLayer(emoji);
-                    setStickerPickerOpen(false);
-                  }}>
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setStickerPickerOpen(false)}
+        onSelect={(emoji) => {
+          addStickerLayer(emoji);
+          setStickerPickerOpen(false);
+        }}
+        theme={theme}
+        recentEmojis={recentStickers}
+      />
     </SafeAreaView>
   );
 }
@@ -911,38 +889,5 @@ const styles = StyleSheet.create({
     width: '16.66%',
     height: '16.66%',
     backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  stickerModal: {
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 16,
-    gap: 12,
-  },
-  stickerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  closeChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  closeChipText: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  stickerGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
   },
 });
