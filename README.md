@@ -12,6 +12,11 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 npx expo prebuild
 npx expo run:android
 
+## EAS GH build
+```Label
+eas-build-all:development
+```
+
 
 2. Start the app
 
